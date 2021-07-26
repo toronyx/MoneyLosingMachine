@@ -8,6 +8,7 @@ Main code.
 
 import bots
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 import datetime
 import time
@@ -19,8 +20,8 @@ API_key = open('C:/Users/Tom/github/MoneyLosingMachine/key.txt').read()
 ts = TimeSeries(key=API_key, output_format='pandas')
 print('Key accepted')
 
-user_input = input('Request new data? (y/n)')
-#user_input = 'n'
+#user_input = input('Request new data? (y/n)')
+user_input = 'n'
 if user_input == 'y':
     print('Requesting Alpha Vantage data...')
     t0 = time.time()
@@ -35,30 +36,29 @@ else:
     data = pd.read_pickle('C:/Users/Tom/github/MoneyLosingMachine/data.pkl')
     print('Data unpickled')
 
-"""print('Acquiring data...')
-#t0 = time.time()
-dataframe = ts.get_daily('CNCR', outputsize='full')
-dataframe.to_pickle('dataframe')
-dataframe = pd.read_pickle('dataframe')
-data, meta_data = dataframe
-#t1 = time.time()
-print('Data acquired, length:', len(data))#, 'Time taken:', t0 - t1, 's')"""
-
 data.columns = ['open', 'high', 'low', 'close', 'volume']
 data['TradeDate'] = data.index.date
 data['time'] = data.index.time
 
-plt.plot(data[data['TradeDate']>datetime.date(2020, 1, 1)]['close'])
+fig, ax = plt.subplots(nrows=1, ncols=1)
+ax.plot(data[data['TradeDate']>datetime.date(2021, 1, 1)]['close'])
+
 
 simple_jack = bots.simple_jack()
 #for date in pd.date_range(start="2020-01-01",end="2020-07-01"):
+action_info = np.empty((0,3))
 for date in pd.date_range(start="2021-01-01", end=data['TradeDate'].max()):
     if not data[data['TradeDate']==date].empty:
-        price = data[data['TradeDate']==date]['close'][-1]
-        #print(date.date())#, ' $', price)
-        simple_jack.execute_strategy(data, date)
+        action = simple_jack.execute_strategy(data[data['TradeDate']<=date], date)
+        #price = daily_data[daily_data['TradeDate']==date]['close'][-1]
+        action_info = np.vstack((action_info, np.array([date, action[0], action[1]])))
 
 print('Total profit: $ {0:.2f}'.format(simple_jack.balance))
 
+buy_dates = action_info[:,0][np.where(action_info[:,1]=='buy')[0]]
+sell_dates = action_info[:,0][np.where(action_info[:,1]=='sell')[0]]
+
+ax.scatter(buy_dates, data.loc[buy_dates]['close'], marker='^', color='g')
+ax.scatter(sell_dates, data.loc[sell_dates]['close'], marker='v', color='r')
 
 plt.show()

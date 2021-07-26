@@ -22,13 +22,13 @@ class daily_trading_bot:
         price = daily_data[daily_data['TradeDate']==date]['close'][-1]
         self.balance -= price*number_of_shares
         self.shares += number_of_shares
-        print("Bought {0} shares for $ {1} total on {2}".format(number_of_shares, price*number_of_shares, date.date()))
+        #print("Bought {0} shares for $ {1} total on {2}".format(number_of_shares, price*number_of_shares, date.date()))
 
     def sell(self, daily_data, date, number_of_shares):
         price = daily_data[daily_data['TradeDate']==date]['close'][-1]
         self.balance += price*number_of_shares
         self.shares -= number_of_shares
-        print("Sold {0} shares for $ {1} total on {2}".format(number_of_shares, price*number_of_shares, date.date()))
+        #print("Sold {0} shares for $ {1} total on {2}".format(number_of_shares, price*number_of_shares, date.date()))
 
 
 
@@ -41,5 +41,11 @@ class simple_jack(daily_trading_bot):
         price = daily_data[daily_data['TradeDate']==date]['close'][-1]
         if price < 29:
             self.buy(daily_data, date, 1)
-        if (price > 31) and (self.shares >= 1):
+            # giving this function a return code gives us a way to see what the
+            # bot is doing without relying on print statements
+            return 'buy', 1
+        elif (price > 31) and (self.shares >= 1):
             self.sell(daily_data, date, 1)
+            return 'sell', 1
+        else:
+            return '', 0
