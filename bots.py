@@ -7,6 +7,8 @@ This file will hold the various trading bots.
 @author: Tom Ronayne
 """
 
+import numpy as np
+
 class daily_trading_bot:
     """
     I've decided to give the traders (children of this class) names, as it would
@@ -46,6 +48,28 @@ class simple_jack(daily_trading_bot):
             return 'buy', 1
         elif (price > 31) and (self.shares >= 1):
             self.sell(daily_data, date, 1)
+            return 'sell', 1
+        else:
+            return '', 0
+
+class marvin(daily_trading_bot):
+    """
+    Marvin will use a moving average (mav) to determine what to do.
+    """
+
+    def execute_strategy(self, daily_data, date):
+        price = daily_data[daily_data['TradeDate']==date]['close'][-1]
+        # expect errors if we don't give this bot a 60 day head start on data
+        moving_average_period = 60
+        moving_average = np.mean(daily_data[date<=daily_data['TradeDate']]['close'][-moving_average_period::])
+        print('price, moving_average: ', price, moving_average)
+        if price-moving_average < -1:
+            self.buy(daily_data, date, 1)
+            # giving this function a return code gives us a way to see what the
+            # bot is doing without relying on print statements
+            return 'buy', 1
+        elif (price-moving_average > 1) and (self.shares >= 1):
+            self.sell(daily_data, date, self.shares)
             return 'sell', 1
         else:
             return '', 0
