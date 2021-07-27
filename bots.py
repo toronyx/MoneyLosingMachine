@@ -16,8 +16,8 @@ class daily_trading_bot:
     their strategy.
     """
 
-    def __init__(self):
-        self.balance = 0
+    def __init__(self, balance=0):
+        self.balance = balance
         self.shares = 0
 
     def buy(self, daily_data, date, number_of_shares):
@@ -58,15 +58,15 @@ class marvin(daily_trading_bot):
     """
 
     def execute_strategy(self, daily_data, date):
-        price = daily_data[daily_data['TradeDate']==date]['close'][-1]
-        # expect errors if we don't give this bot a 60 day head start on data
-        moving_average_period = 60
-        moving_average = np.mean(daily_data[date<=daily_data['TradeDate']]['close'][-moving_average_period::])
-        print('price, moving_average: ', price, moving_average)
-        if price-moving_average < -1:
-            self.buy(daily_data, date, 1)
+        price = daily_data['close'][0]
+        # expect errors if we don't give this bot a 10 day head start on data
+        # in our implementation, the moving average lags behind the market
+        moving_average_period = 10
+        moving_average = np.mean(daily_data['close'][0:moving_average_period])
+        if (price-moving_average < -1) and (self.balance > price):
             # giving this function a return code gives us a way to see what the
             # bot is doing without relying on print statements
+            self.buy(daily_data, date, self.balance//price)
             return 'buy', 1
         elif (price-moving_average > 1) and (self.shares >= 1):
             self.sell(daily_data, date, self.shares)
