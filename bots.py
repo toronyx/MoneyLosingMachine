@@ -11,8 +11,8 @@ import numpy as np
 
 class daily_trading_bot:
     """
-    I've decided to give the traders (children of this class) names, as it would
-    be challenging to give each different bot a name that adequately describes
+    I've decided to give the traders (children of this class) human names, as it
+    would be challenging to give each different bot a name that adequately describes
     their strategy.
     """
 
