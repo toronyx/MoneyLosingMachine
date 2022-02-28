@@ -21,12 +21,12 @@ API_key = open('C:/Users/Tom/github/MoneyLosingMachine/key.txt').read()
 ts = TimeSeries(key=API_key, output_format='pandas')
 print('Key accepted')
 
-ticker = 'EXC'
+ticker = 'VMAC'
 
 """ Read in data """
 
-#user_input = input('Request new data? (y/n)')
-user_input = 'y'
+user_input = input('Request new data? (y/n)')
+#user_input = 'y'# NOTE:
 if user_input == 'y':
     print('Requesting Alpha Vantage data...')
     t0 = time.time()
@@ -57,18 +57,18 @@ mpf.plot(data[data['TradeDate']>datetime.date(2021, 1, 1)],
 
 plt.style.use('dark_background')
 fig, ax = plt.subplots(nrows=1, ncols=1)
-ax.plot(data[data['TradeDate']>datetime.date(2021, 1, 1)]['close'])
+ax.plot(data[data['TradeDate']>datetime.date(2019, 1, 1)]['close'])
 ax.set_title('Close price for {0} ticker'.format(ticker))
 ax.set_ylabel('Close price /\$')
 
-current_bot = bots.marvin(balance=100) #simple_jack()
+current_bot = bots.marvin(balance=1000) #simple_jack()
 
 #for date in pd.date_range(start="2020-01-01",end="2020-07-01"):
 action_info = np.empty((0,3))
 moving_average = np.empty(0)
 moving_average_period = 10
 trading_dates = []
-for date in pd.date_range(start="2021-01-01", end=data['TradeDate'].max()):
+for date in pd.date_range(start="2019-01-01", end=data['TradeDate'].max()):
     if not data[data['TradeDate']==date].empty:
         action = current_bot.execute_strategy(data[data['TradeDate']<=date], date)
         action_info = np.vstack((action_info, np.array([date, action[0], action[1]])))
